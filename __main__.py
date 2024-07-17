@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import shutil
 import openpyxl
+from time import sleep
 
 
 # Env variables
@@ -41,6 +42,7 @@ class PageGenerator():
                 "row": 1,
                 "names": [
                     "url",
+                    # title required in all pages
                     "title",
                     "description",
                     "image url",
@@ -147,26 +149,40 @@ class PageGenerator():
     def generate_pages(self):
         """ Generate pages using template with and excel data """
         
+        print("Generating pages...")
+        
         template_path = os.path.join(self.templates_folder, f"{self.template_name}.html")
         template_content = open(template_path, "r").read()
         
         # generate each html file with excel data
         for row in self.excel_data[self.template_columns_row:]:
             
-            content = template_content
+            sleep(0.1)
+            
+            # Create folder
+            title_index = self.excel_header.index("title")
+            page_title = row[title_index]
+            slug = page_title.lower().replace(" ", "-")
+            
+            print(f"\tGenerating page: {slug}")
+            
+            # Create html folder
+            html_folder = os.path.join(self.htmls_folder, slug)
+            os.makedirs(html_folder, exist_ok=True)
+            html_path = os.path.join(html_folder, "index.html")
             
             # Replace each cell in template
+            content = template_content
             for cell in row:
                 cell_index = row.index(cell)
                 current_column_name = self.excel_header[cell_index]
                 
                 content = content.replace(f"[{current_column_name}]", cell)
-                
-            with open("temp.html", "w") as f:
-                f.write(content)
-    
-            print()
             
+            # Save html file with content
+            with open(html_path, "w") as file:
+                file.write(content)
+                
     
 if __name__ == "__main__":
     pg = PageGenerator(TEMPLATE)
