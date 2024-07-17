@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import shutil
 import openpyxl
 
 
@@ -28,6 +29,7 @@ class PageGenerator():
         self.current_folder = os.path.dirname(os.path.abspath(__file__))
         self.templates_folder = os.path.join(self.current_folder, "templates")
         self.excels_folder = os.path.join(self.current_folder, "excels")
+        self.htmls_folder = os.path.join(self.current_folder, "htmls")
         
         # Data variables
         self.excel_data = []
@@ -57,6 +59,9 @@ class PageGenerator():
         
         # Process data
         self.__replace_images_paths__()
+        
+        # Process folders
+        self.__clean_htmls_folder__()
         
     def __load_excel_data__(self):
         """ Read excel data and save in instance
@@ -127,6 +132,18 @@ class PageGenerator():
                 new_image_path = f"../{IMAGES_FOLDER}/{image_file}"
                 row[column_index] = new_image_path
 
+    def __clean_htmls_folder__(self):
+        """ Clean html folder """
+        
+        print("Cleaning html folder...")
+        
+        for file in os.listdir(self.htmls_folder):
+            file_path = os.path.join(self.htmls_folder, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+                
     def generate_pages(self):
         """ Generate pages using template with and excel data """
         
