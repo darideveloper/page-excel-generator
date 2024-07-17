@@ -32,6 +32,11 @@ class PageGenerator():
         self.excels_folder = os.path.join(self.current_folder, "excels")
         self.htmls_folder = os.path.join(self.current_folder, "htmls")
         
+        # Create folders if not exists
+        os.makedirs(self.templates_folder, exist_ok=True)
+        os.makedirs(self.excels_folder, exist_ok=True)
+        os.makedirs(self.htmls_folder, exist_ok=True)
+        
         # Data variables
         self.excel_data = []
         self.excel_header = []
