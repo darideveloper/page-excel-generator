@@ -37,7 +37,7 @@ class PageGenerator():
         self.columns = {
             "redirect": {
                 "row": 1,
-                "columns_names": [
+                "names": [
                     "url",
                     "title",
                     "description",
@@ -47,11 +47,16 @@ class PageGenerator():
             }
         }
         self.template_columns = self.columns[self.template_name]
+        self.template_columns_row = self.template_columns["row"]
+        self.template_columns_names = self.template_columns["names"]
         
         # Load excel data and validate columns
         self.__load_excel_data__()
         self.__save_header__()
         self.__validate_excel_columns__()
+        
+        # Process data
+        self.__replace_images_paths__()
         
     def __load_excel_data__(self):
         """ Read excel data and save in instance
@@ -86,7 +91,7 @@ class PageGenerator():
     def __save_header__(self):
         """ Save in instance the excel header """
         
-        template_row = self.template_columns["row"]
+        template_row = self.template_columns_row
         excel_header = self.excel_data[template_row - 1]
         self.excel_header = excel_header
         
@@ -96,7 +101,7 @@ class PageGenerator():
         print("Validating excel columns...")
         
         # Get current columns
-        template_columns_names = self.template_columns["columns_names"]
+        template_columns_names = self.template_columns_names
         
         # Validete excel header
         for column_name in template_columns_names:
@@ -104,6 +109,23 @@ class PageGenerator():
                 error = f"Column '{column_name}' not found in excel"
                 error += f"\nExcel columns: {self.excel_header}"
                 raise ValueError(error)
+            
+    def __replace_images_paths__(self):
+        """ Replace images paths using relative paths and images folder """
+        
+        # Identify images columns
+        images_columns_indexes = []
+        for column_name in self.excel_header:
+            if "image" in column_name:
+                column_index = self.excel_header.index(column_name)
+                images_columns_indexes.append(column_index)
+        
+        # Replace images paths
+        for row in self.excel_data[self.template_columns_row:]:
+            for column_index in images_columns_indexes:
+                image_file = row[column_index]
+                new_image_path = f"../{IMAGES_FOLDER}/{image_file}"
+                row[column_index] = new_image_path
 
     def generate_pages(self):
         """ Generate pages using template with and excel data """
@@ -112,8 +134,7 @@ class PageGenerator():
         template_content = open(template_path, "r").read()
         
         # generate each html file with excel data
-        start_row = self.template_columns["row"]
-        for row in self.excel_data[start_row:]:
+        for row in self.excel_data[self.template_columns_row:]:
             
             content = template_content
             
@@ -127,6 +148,8 @@ class PageGenerator():
             with open("temp.html", "w") as f:
                 f.write(content)
     
+            print()
+            
     
 if __name__ == "__main__":
     pg = PageGenerator(TEMPLATE)
