@@ -1,8 +1,10 @@
 import os
-from dotenv import load_dotenv
 import shutil
+import zipfile
 import openpyxl
 from time import sleep
+
+from dotenv import load_dotenv
 
 
 # Env variables
@@ -188,7 +190,32 @@ class PageGenerator():
             with open(html_path, "w") as file:
                 file.write(content)
                 
+    def compress_htmls(self):
+        """ Compress htmls folders to zip """
+        
+        print("Compressing htmls...")
+        
+        output_path = os.path.join(self.htmls_folder, "pages.zip")
+        folders = os.listdir(self.htmls_folder)
+        folders = [os.path.join(self.htmls_folder, folder) for folder in folders]
+        
+        with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            
+            for folder in folders:
+                
+                # Walk the directory tree
+                for root, dirs, files in os.walk(folder):
+                    for file in files:
+                        # Create the relative path for the file and write it to the zip
+                        file_path = os.path.join(root, file)
+                        relative_path = os.path.relpath(
+                            file_path,
+                            os.path.join(folder, '..')
+                        )
+                        zipf.write(file_path, relative_path)
+    
     
 if __name__ == "__main__":
     pg = PageGenerator(TEMPLATE)
     pg.generate_pages()
+    pg.compress_htmls()
