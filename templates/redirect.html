@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" prefix="og: http://ogp.me/ns#">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  
   <title>Redirecting...</title>
+
+  <!-- Redirect -->
+  <meta http-equiv="refresh" content="0; url=[url]">
 
   <!-- Open Graph tags -->
   <meta property="og:type" content="website">
@@ -16,6 +20,7 @@
   <meta property="og:image:height" content="1024">
   <meta property="og:site_name" content="[site name]">
 
+  <!-- Twiiter card tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="[title]">
   <meta name="twitter:image" content="[image url]">
@@ -25,13 +30,16 @@
   <meta name="twitter:image:width" content="1024">
   <meta name="twitter:image:height" content="1024">
 
+  <!-- link tags -->
   <link rel="image_src" href="[image url]">
 
 </head>
+
 <body>
   <small>
     <p>Redirecting...</p>
     <p>Did not redirect? <a href="[url]">Click here</a></p>
   </small>
 </body>
+
 </html>

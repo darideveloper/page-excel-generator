@@ -1,6 +1,0 @@
-ruta completa de la imagen en servidor
-extensión de la imagen
-imagen en mismo dominio de github
-si se usa github:
-	no borrar htmls
-	no remplazar carpetas de diferentes archivos
