@@ -138,7 +138,7 @@ class PageGenerator():
         for row in self.excel_data[self.template_columns_row:]:
             for column_index in images_columns_indexes:
                 image_file = row[column_index]
-                new_image_path = f"../{IMAGES_FOLDER}/{image_file}"
+                new_image_path = f"{DOMAIN}/{IMAGES_FOLDER}/{image_file}"
                 row[column_index] = new_image_path
 
     def __clean_htmls_folder__(self):
@@ -169,6 +169,8 @@ class PageGenerator():
             # Create folder
             title_index = self.excel_header.index("title")
             page_title = row[title_index]
+            if not page_title:
+                continue
             slug = page_title.lower().replace(" ", "-")
             
             print(f"\tGenerating page: {slug}")
