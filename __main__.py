@@ -9,34 +9,26 @@ from dotenv import load_dotenv
 
 # Env variables
 load_dotenv()
-TEMPLATE = os.getenv("TEMPLATE")
 DOMAIN = os.getenv("DOMAIN")
 IMAGES_FOLDER = os.getenv("IMAGES_FOLDER")
 EXCEL_SHEET = os.getenv("EXCEL_SHEET")
 
 
 class PageGenerator():
-    def __init__(self, template_name: str):
+    def __init__(self):
         """ Initialize PageGenerator object
         
-        Args:
-            template_name (str): Name of the template to be used
         """
         
         print("Initializing PageGenerator...")
-        print(f"Template: {template_name}")
-        
-        self.template_name = template_name
         
         # Paths
         self.current_folder = os.path.dirname(os.path.abspath(__file__))
-        self.templates_folder = os.path.join(self.current_folder, "templates")
-        self.excels_folder = os.path.join(self.current_folder, "excels")
+        self.template_path = os.path.join(self.current_folder, "template.html")
+        self.excel_path = os.path.join(self.current_folder, "input.xlsx")
         self.htmls_folder = os.path.join(self.current_folder, "htmls")
         
         # Create folders if not exists
-        os.makedirs(self.templates_folder, exist_ok=True)
-        os.makedirs(self.excels_folder, exist_ok=True)
         os.makedirs(self.htmls_folder, exist_ok=True)
         
         # Data variables
@@ -45,21 +37,18 @@ class PageGenerator():
         
         # Validation data
         self.columns = {
-            "redirect": {
-                "row": 1,
-                "names": [
-                    "url",
-                    # title required in all pages
-                    "title",
-                    "description",
-                    "image url",
-                    "site name"
-                ]
-            }
+            "row": 1,
+            "names": [
+                "url",
+                # title required in all pages
+                "title",
+                "description",
+                "image url",
+                "site name"
+            ]
         }
-        self.template_columns = self.columns[self.template_name]
-        self.template_columns_row = self.template_columns["row"]
-        self.template_columns_names = self.template_columns["names"]
+        self.columns_row = self.columns["row"]
+        self.columns_names = self.columns["names"]
         
         # Load excel data and validate columns
         self.__load_excel_data__()
@@ -79,12 +68,11 @@ class PageGenerator():
         print("Loading excel data...")
         
         # Validate excel path
-        excel_path = os.path.join(self.excels_folder, f"{self.template_name}.xlsx")
-        if not os.path.exists(excel_path):
-            raise FileNotFoundError(f"Excel file not found: {excel_path}")
+        if not os.path.exists(self.excel_path):
+            raise FileNotFoundError(f"Excel file not found: {self.excel_path}")
         
         # Read excel
-        wb = openpyxl.load_workbook(excel_path)
+        wb = openpyxl.load_workbook(self.excel_path)
         current_sheet = wb[EXCEL_SHEET]
         
         rows = current_sheet.max_row
@@ -105,7 +93,7 @@ class PageGenerator():
     def __save_header__(self):
         """ Save in instance the excel header """
         
-        template_row = self.template_columns_row
+        template_row = self.columns_row
         excel_header = self.excel_data[template_row - 1]
         self.excel_header = excel_header
         
@@ -114,11 +102,8 @@ class PageGenerator():
         
         print("Validating excel columns...")
         
-        # Get current columns
-        template_columns_names = self.template_columns_names
-        
         # Validete excel header
-        for column_name in template_columns_names:
+        for column_name in self.columns_names:
             if column_name not in self.excel_header:
                 error = f"Column '{column_name}' not found in excel"
                 error += f"\nExcel columns: {self.excel_header}"
@@ -135,7 +120,7 @@ class PageGenerator():
                 images_columns_indexes.append(column_index)
         
         # Replace images paths
-        for row in self.excel_data[self.template_columns_row:]:
+        for row in self.excel_data[self.columns_row:]:
             for column_index in images_columns_indexes:
                 image_file = row[column_index]
                 new_image_path = f"{DOMAIN}/{IMAGES_FOLDER}/{image_file}"
@@ -158,11 +143,10 @@ class PageGenerator():
         
         print("Generating pages...")
         
-        template_path = os.path.join(self.templates_folder, f"{self.template_name}.html")
-        template_content = open(template_path, "r").read()
+        template_content = open(self.template_path, "r").read()
         
         # generate each html file with excel data
-        for row in self.excel_data[self.template_columns_row:]:
+        for row in self.excel_data[self.columns_row:]:
             
             sleep(0.1)
             
@@ -218,6 +202,6 @@ class PageGenerator():
     
     
 if __name__ == "__main__":
-    pg = PageGenerator(TEMPLATE)
+    pg = PageGenerator()
     pg.generate_pages()
     pg.compress_htmls()
