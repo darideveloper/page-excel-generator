@@ -151,7 +151,7 @@ class PageGenerator():
             sleep(0.1)
             
             # Create folder
-            title_index = self.excel_header.index("title")
+            title_index = self.excel_header.index("description")
             page_title = row[title_index]
             if not page_title:
                 continue
