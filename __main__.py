@@ -1,8 +1,12 @@
 import os
 import shutil
 import zipfile
-import openpyxl
 from time import sleep
+from io import BytesIO
+
+import openpyxl
+import requests
+from PIL import Image
 
 from dotenv import load_dotenv
 
@@ -115,7 +119,7 @@ class PageGenerator():
         # Identify images columns
         images_columns_indexes = []
         for column_name in self.excel_header:
-            if "image" in column_name:
+            if "image" in str(column_name):
                 column_index = self.excel_header.index(column_name)
                 images_columns_indexes.append(column_index)
         
@@ -137,7 +141,21 @@ class PageGenerator():
                 os.remove(file_path)
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
-                
+    
+    def __get_image_size__(self, image_url: str) -> tuple[int, int]:
+        """ Return image with and height
+
+        Args:
+            image_url (str): image to download
+            
+        Returns:
+            tuple[int, int]: image width and height
+        """
+        
+        image_res = requests.get(image_url)
+        image = Image.open(BytesIO(image_res.content))
+        return image.size
+           
     def generate_pages(self):
         """ Generate pages using template with and excel data """
         
@@ -171,6 +189,12 @@ class PageGenerator():
                 current_column_name = self.excel_header[cell_index]
                 
                 content = content.replace(f"[{current_column_name}]", cell)
+                
+            # Remplace image size
+            image_url = row[self.excel_header.index("image url")]
+            image_width, image_height = self.__get_image_size__(image_url)
+            content = content.replace("[image width]", str(image_width))
+            content = content.replace("[image height]", str(image_height))
             
             # Save html file with content
             with open(html_path, "w") as file:
