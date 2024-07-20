@@ -152,7 +152,11 @@ class PageGenerator():
             tuple[int, int]: image width and height
         """
         
-        image_res = requests.get(image_url)
+        try:
+            image_res = requests.get(image_url)
+            image_res.raise_for_status()
+        except Exception:
+            return 0, 0
         image = Image.open(BytesIO(image_res.content))
         return image.size
            
@@ -193,11 +197,14 @@ class PageGenerator():
             # Remplace image size
             image_url = row[self.excel_header.index("image url")]
             image_width, image_height = self.__get_image_size__(image_url)
+            if not image_width and not image_height:
+                print(f"\t\tError getting image size: {image_url}")
+                continue
             content = content.replace("[image width]", str(image_width))
             content = content.replace("[image height]", str(image_height))
             
             # Save html file with content
-            with open(html_path, "w") as file:
+            with open(html_path, "w", encoding="utf-8") as file:
                 file.write(content)
                 
     def compress_htmls(self):
