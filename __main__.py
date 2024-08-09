@@ -152,14 +152,23 @@ class PageGenerator():
             tuple[int, int]: image width and height
         """
         
-        try:
-            image_res = requests.get(image_url)
-            image_res.raise_for_status()
-        except Exception:
-            return 0, 0
-        image = Image.open(BytesIO(image_res.content))
-        return image.size
-           
+        images_urls = []
+        images_urls.append(image_url)
+        if not "https://www":
+            www_image_url = image_url.replace("https://", "https://www.")
+            images_urls.append(www_image_url)
+        
+        for image_url in images_urls:
+            try:
+                image_res = requests.get(image_url)
+                image_res.raise_for_status()
+            except Exception:
+                continue
+            image = Image.open(BytesIO(image_res.content))
+            return image.size
+        
+        return None, None
+    
     def generate_pages(self):
         """ Generate pages using template with and excel data """
         
