@@ -196,9 +196,11 @@ class PageGenerator():
                 
             # Remplace image size
             image_url = row[self.excel_header.index("image url")]
+            if not image_url.endswith(".webp"):
+                image_url = f"{image_url}.webp"
             image_width, image_height = self.__get_image_size__(image_url)
             if not image_width and not image_height:
-                print(f"\t\tError getting image size: {image_url}")
+                print(f"\t\tError downloading image or calculating size: {image_url}")
                 continue
             content = content.replace("[image width]", str(image_width))
             content = content.replace("[image height]", str(image_height))
